@@ -1,63 +1,17 @@
-# Homepage
+# Welcome to CG Tea!
+Please have a seat and spill some (CG) tea with us. :heart:
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+## Introduction
+This place (which one day may be worthy of being called "wiki") was created to collect the results of personal rnd, stupid things I realized and/or have been doing in my spare time.  
+Heavily inspired by [tokeru](https://tokeru.com/cgwiki) and other cool websites, I hope this might be eventually useful for someone who finds himself banging his head on the same wall I had the pleasure of meeting already.  
 
-## Code Annotation Examples
+!!! warning
+    At the moment of writing everything is still under construction, I hope to fill it with useful stuff soon. It might be very messy in the meantime (or maybe not?)
 
-### Codeblocks
+In addition to the nonsense I'll be plopping here, I hope some friends will soon start to join me in this small adventure, sharing their own discoveries and, more likely, rants (you have no idea how far down the vellum rabbit hole some people can dig while still being able to walk home at the end of the day).
 
-Some `code` goes here.
+???- abstract "tl;dr"
+    i'm on vacation and bored
 
-### Plain codeblock
-
-A plain codeblock:
-
-```
-Some code here
-def myfunction()
-// some comment
-```
-
-#### Code for a specific language
-
-Some more code with the `py` at the start:
-
-``` py
-import tensorflow as tf
-def whatever()
-```
-
-#### With a title
-
-``` py title="bubble_sort.py"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-#### With line numbers
-
-``` py linenums="1"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-#### Highlighting lines
-
-``` py hl_lines="2 3"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-## Icons and Emojs
-
-:smile: 
-
+## Credits
+Made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
