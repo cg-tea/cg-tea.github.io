@@ -1,8 +1,5 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/images/hero_banner.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/images/hero_banner.png">
-  <img alt="CG Tea Wiki" title="CG Tea Wiki">
-</picture>
+![CG Tea Wiki](docs/assets/images/hero_banner.png#gh-dark-mode-only)
+![CG Tea Wiki](docs/assets/images/hero_banner_light.png#gh-light-mode-only)
 
 # CG Tea Wiki
 Aka a bunch of peeps plopping somewhat useful ideas and tips about CG and VFX.
