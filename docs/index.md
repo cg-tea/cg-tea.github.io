@@ -1,8 +1,8 @@
 # Welcome to CG Tea!
-Please have a seat and spill some (CG) tea with us. :heart:
+Please have a sip and spill some CG tea with us. :heart:
 
 ## Introduction
-This place (which one day may be worthy of being called "wiki") was created to collect the results of personal rnd, stupid things I realized and/or have been doing in my spare time.  
+This place (which one day may be worthy of being called "wiki") was created to collect personal rnd, more or less useful things I discovered and small projects I have been doing in my spare time.  
 Heavily inspired by [tokeru](https://tokeru.com/cgwiki) and other cool websites, I hope this might be eventually useful for someone who finds himself banging his head on the same wall I had the pleasure of meeting already.  
 
 !!! warning
