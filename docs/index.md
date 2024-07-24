@@ -1,17 +1,35 @@
-# Welcome to CG Tea!
-Please have a sip and spill some CG tea with us. :heart:
+<div markdown="span" style="margin: -30% -10% 0 -7.1%;">
+    ![CG Tea Wiki Welcome, please have a sip.](assets/images/hero_banner.png#gh-dark-mode-only){title="CG Tea Wiki Welcome, please have a sip."}
+    ![CG Tea Wiki Welcome, please have a sip.](assets/images/hero_banner_light.png#gh-light-mode-only){title="CG Tea Wiki Welcome, please have a sip."}
+</div>
 
-## Introduction
-This place (which one day may be worthy of being called "wiki") was created to collect personal rnd, more or less useful things I discovered and small projects I have been doing in my spare time.  
-Heavily inspired by [tokeru](https://tokeru.com/cgwiki) and other cool websites, I hope this might be eventually useful for someone who finds himself banging his head on the same wall I had the pleasure of meeting already.  
+# Welcome to CG Tea, wanna spill some tea? :heart:
+A place for TDs, CG and VFX artists to share ideas.  
+
+## Introduction and motivations
+Hey there!
+
+This website - which one day may actually be worthy of the "wiki" label - was created to collect some personal RnDs, notes and more-or-less useful things I discovered or that I was introduced to by friends and colleagues.  
+I often find myself checking whether someone already did something to solve the same problem I'm dealing with. I feel that's always a very good time investment, no matter if the reaction I have after finding out is `oh jees I'm dumb` or `mmmh I see, I may do something different though`.
+
+Inspired by [tokeru](https://tokeru.com/cgwiki) and other cool websites that were (more or less) born with the same principle in mind, I hope this big hotpot may eventually be useful to people that find themselves banging their head against the same wall I had the pleasure to bonk already.
+
+The contents of this wiki will be various: there may be DCC specific stuff (probably Houdini mainly), or concepts that are common to the CG and VFX universe as a whole.  
+
+Long story short, this is an online notebook, because of that Note that the quality of what's posted here will very likely depend on the mental status of the person writing in that moment.
 
 !!! warning
-    At the moment of writing everything is still under construction, I hope to fill it with useful stuff soon. It might be very messy in the meantime (or maybe not?)
+    At the moment the website is under construction, I'm still trying to figure out how GitHub Pages work. I hope to fill it with useful stuff soon.  
+    It may be very messy in the meantime (or maybe not?)
 
 In addition to the nonsense I'll be plopping here, I hope some friends will soon start to join me in this small adventure, sharing their own discoveries and, more likely, rants (you have no idea how far down the vellum rabbit hole some people can dig while still being able to walk home at the end of the day).
 
 ???- abstract "tl;dr"
     i'm on vacation and bored
 
+Hope you'll find something useful!
+
 ## Credits
+[Giacomo Balma](https://github.com/giac-b)
+
 Made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
