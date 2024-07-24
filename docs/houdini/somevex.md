@@ -1,4 +1,5 @@
 # A little bit of this, a little bit of vex
+
 Scrippity dobbity doup
 
 ## Code Annotation Examples
@@ -21,14 +22,14 @@ def myfunction()
 
 Some more code with the `py` at the start:
 
-``` py
+```py
 import tensorflow as tf
 def whatever()
 ```
 
 #### With a title
 
-``` py title="bubble_sort.py"
+```py title="bubble_sort.py"
 def bubble_sort(items):
     for i in range(len(items)):
         for j in range(len(items) - 1 - i):
@@ -38,7 +39,7 @@ def bubble_sort(items):
 
 #### With line numbers
 
-``` py linenums="1"
+```py linenums="1"
 def bubble_sort(items):
     for i in range(len(items)):
         for j in range(len(items) - 1 - i):
@@ -48,7 +49,7 @@ def bubble_sort(items):
 
 #### Highlighting lines
 
-``` py hl_lines="2 3"
+```py hl_lines="2 3"
 def bubble_sort(items):
     for i in range(len(items)):
         for j in range(len(items) - 1 - i):
@@ -58,4 +59,4 @@ def bubble_sort(items):
 
 ## Icons and Emojs
 
-:smile: 
+:smile:
