@@ -3,8 +3,8 @@
     ![CG Tea Wiki Welcome, please have a sip.](assets/images/hero_banner_light.png#gh-light-mode-only){title="CG Tea Wiki Welcome, please have a sip."}
 </div>
 
-# Welcome to CG Tea, wanna spill some tea? :heart:
-A place for TDs, CG and VFX artists to share ideas.  
+# Welcome to CG Tea, don't mind if i spill some :heart:
+A place for TDs, CG and VFX artists to share and find ideas.  
 
 ## Introduction and motivations
 Hey there!
@@ -14,9 +14,9 @@ I often find myself checking whether someone already did something to solve the 
 
 Inspired by [tokeru](https://tokeru.com/cgwiki) and other cool websites that were (more or less) born with the same principle in mind, I hope this big hotpot may eventually be useful to people that find themselves banging their head against the same wall I had the pleasure to bonk already.
 
-The contents of this wiki will be various: there may be DCC specific stuff (probably Houdini mainly), or concepts that are common to the CG and VFX universe as a whole.  
+The contents of this wiki will be various: you'll find DCC specific stuff (Houdini mainly), but also concepts that are common to the CG and VFX universe as a whole.  
 
-Long story short, this is an online notebook, because of that Note that the quality of what's posted here will very likely depend on the mental status of the person writing in that moment.
+Long story short, this is an online notebook, be aware that the quality of what's posted here will very likely depend on the mental status of the person writing in that moment.
 
 !!! warning
     At the moment the website is under construction, I'm still trying to figure out how GitHub Pages work. I hope to fill it with useful stuff soon.  
