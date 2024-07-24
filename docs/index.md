@@ -28,7 +28,7 @@ In addition to the nonsense I'll be plopping here, I hope some friends will soon
     i'm on vacation and bored
 
 Hope you'll find something useful!
-
+ 
 ## Credits
 [Giacomo Balma](https://github.com/giac-b)
 
