@@ -3,8 +3,15 @@
     ![CG Tea Wiki Welcome, please have a sip.](assets/images/hero_banner_light.png#gh-light-mode-only){title="CG Tea Wiki Welcome, please have a sip."}
 </div>
 
-# Welcome to CG Tea, don't mind if i spill some :heart:
-A place for TDs, CG and VFX artists to share and find ideas.  
+<style>
+  .md-typeset h1,
+  .md-content__button {
+    display: none;
+  }
+</style>
+
+A small wiki that collects notes, scripts, setups and documentation for VFX artists and TDs.  
+Wanna spill some CG tea? ☕
 
 ## Introduction and motivations
 Hey there!

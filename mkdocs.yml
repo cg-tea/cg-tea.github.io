@@ -1,6 +1,7 @@
 site_name: CG Tea
-
-site_url: https://cgtrivia.github.io
+site_url: https://cgtea.github.io
+site_description: "A small wiki that collects notes, scripts, setups and documentation for VFX artists and TDs. ☕ Welcome, please have a sip." 
+site_author: "Giacomo Balma"
 
 theme:
   name: material
