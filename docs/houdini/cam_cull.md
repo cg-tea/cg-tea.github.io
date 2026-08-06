@@ -1,80 +1,98 @@
 # Frustum cull simulations and moving cameras
-When working on very heavy simulations you'll often get to the point of trying to optimize things to hopefully having them go through the farm without someone from system or production yelling at you, or your own workstation going  
+When working on heavy simulations, you'll eventually reach the point where you're trying to optimize things to get that extra bit of detail without having to wait for days. Ideally you'd like things go through the farm without someone from system or production yelling at you, or your own workstation going
 
- ![Fatal Error](../assets/pages/hou_camcull/fatal_error.jpg){width="100%"}
+<figure markdown="span">
+    ![Fatal Error](/assets/pages/hou_camcull/fatal_error.jpg){width="90%"}
+</figure>
 
-Besides wedging and clustering, a very common operation to perform in these situations is camera frustum culling at simulation time.  
-Until here, nothing new. Depending on the solver you're using you might opt for a *toNDC-and-check-if-in-unit-cube* approach or a *volumesample-the-camera-frustum-volume*, you name it.  
+On top of clustering, a very common operation in these situations is camera culling at simulation time.  
+Depending on the solver you're using you might opt for a *toNDC-check* or a *volumesample-the-frustum* approach, you name it.  
 
-What I'd like to talk about here, however, is a possible solution to deal with those shots where:
+Unfortunately, camera culling in a solver doesn't really do well in those situations where the simulation must be computed in regions that are currently NOT framed by the camera, but that will eventually be.  
+Those regions therefore can't simply be culled, as this would prevent the simulated objects from being present when they are needed (*duh*). 
 
-* the simulation needs to be calculated in areas that are not always framed by the camera, but that will eventually be, thus can't be simply camera culled (as this would result in the sim object not being there when you need it to);  
-* we still want to get rid of things as soon as they get out of the camera view because they won't be framed again > optimization goes stonks. 📈
-
-The perfect example use case would be a shot were the camera moves a lot, traveling a long distance. Since we're here, what if the camera turns back looking at what's left behind.  
-Perfect situation where I'd personally be like "yeet it to the farm, hopefully a few more clusters will do this time".
-
-## Houdini sample scene
-I made a simple test scene in houdini so I can stop yapping and start showing instead.  
-If you prefer to check it for yourself, here's the hipfile:
-
-!!! abstract "Download houdini [hipfile](../assets/projectfiles/houdini/pyro_culling_trail.git_v001.hipnc)."
-
-Imagine having to work on something like this(1): 
+So how do we keep out-of-frustum stuff simming while still getting rid of it as soon as it leaves the camera?^(1)^ 
 { .annotate }
 
-1.  now, imagine if this was also not looking like trash
+1. and without using any keyframe, hate those
 
-![Pyro camera cull result](../assets/pages/hou_camcull/final_shot.gif)
+## Houdini sample scene
+Here's a simple scene showing the technique described on this page. Please feel free to download and check it yourself.
 
-The elements are:
+[:custom-houdini-badge: Hipfile Download](/assets/projectfiles/houdini/pyro_culling_trail.git_v001.hipnc){.md-button .download-hipfile}
 
-* a bunch of ^~non-ILM-looking™~^ smoke plumes that need preroll before being framed
-* a ~^non-ILM-looking-either™^~ explosion happening out of camera
+Imagine having to work on something like this:^(1)^ 
+{ .annotate }
+
+1.  damn, it looks like trash, more voxels will definitely fix it
+
+<video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/final_shot.webm" type="video/webm">
+</video>
+
+
+This (amazing) shot features:
+
+* a bunch of [smoke plumes]("not ILM™ looking") that need preroll before being framed
+
+* an [explosion]("not quite Michael Bay™ worthy") happening out of camera
+
 * camera traveling a decent distance, then turning around
 
-As I said before, I'd like to camera cull my sims as soon as they're not needed anymore (ie: left behind). 
+As I said before, I'd like to camera cull my sims as soon as they're not needed anymore (ie: left behind).  
 There are a few ways to achieve what we're looking for.  
 
 !!! example "Fedor's Take"
-    For example, my dear deskmate Fedor Koleganov once showed me his approach for these kind of situations.  Starting from the current frame, trail the camera frustum forward until the end of the shot range. Make a VDB out of it for every frame. Then `volumesample` it at sim time: if the particle/voxel is outside, blast it/deactivate it > done!  
+    My dear deskmate Fedor Koleganov once showed me his approach for these kind of situations.   
+    Starting from the current frame, trail the camera frustum forward until the end of the shot range. Make a VDB out of it. Cache one for each frame. Then `volumesample` it at sim time: if the particle/voxel is outside, blast it/deactivate it > done!  
     Given a frame, trailing the camera frustum until the end of the shot returns an active area that covers everything that's going to be needed *"in the future"*, while excluding everything that's already *"gone"*. Pretty cool uh? 
 
-While this is valid, since 80% of my time in the studio consists in arguing with him, I tried to come up with a non-time-dependent alternative.    
-That is to say, I only want to load my culling data once and use that, instead of having to compute a different masking volume for each frame.  
-If you couldn't care less, then go with the first approach, otherwise keep scrolling to see how we get to something like this:
+While Fedor's solution is valid, since 80% of my time in the studio consists of arguing with him, I tried to come up with a non-time-dependent version of it. That is to say, I only want to load my culling data once and use that, instead of having to compute a different masking volume for each frame.  
+If you couldn't care less, then go with Fedor's approach^(1)^, otherwise keep scrolling to see how we get to this:
+{.annotate}
 
-![Pyro camera cull result](../assets/pages/hou_camcull/cam_cull_witness.gif)
+1. he'll be very happy, me on the other hand...
+<figure markdown="span">
+    ![Pyro camera cull result](/assets/pages/hou_camcull/cam_cull_witness.gif){width="80%"}
+</figure>
 
 ## Camera frustum trail - `last_frame` utility volume
 
-This solution will also use a camera frustum volume trail. 
-To achieve what we're looking for though, we're not going to generate a simple 0-1 masking value. Instead, let's treat it as a utility grid where every voxel contains the last frame at which that portion of space was effectively "seen" by the camera.
+This solution will also use a camera frustum volume trail.  
+To achieve a non-time-dependent solution though, we're not going to use a simple 0-1 masking value. Instead, let's treat the volume as a utility grid where voxels store the *last frame* at which that portion of space was effectively "seen" by the camera. It's pretty straightforward:
 
-To do it, we first generate a volume grid representing the camera frustum. The volume resolution can be quite low as this will simply act as a mask.  
-We then assign the volume a density value of `$F`.  
-Now, all the space seen by the camera at the current frame has a value equal to the current frame itself (*duh*).
+- First, we generate a volume grid representing the camera frustum. The volume can be quite low-res as it will simply act as a mask.  
+We assign the whole volume a density value of `$F`.  
+Now, the region of space seen by the camera at the current frame has a value equal to the current frame (*duh*).
 
-!!!warning
-    The volume will look like absolute garbage in the viewport, this is because the density value will likely be very high, unless your working with a [1; N] frame range. Which is not the case, right? Right.
+- We then repeat this for each frame of the shot, storing in a final grid the maximum Frame value for each voxel in space. This will effectively give us the last time a certain portion of space was last seen by the camera!  
+We can achieve this with a simple sop solver. Inside the solver we compare the current frame and the previous one, using a `vdbcombine` we save the maximum value of each voxel.  
 
-We then want to trail the whole shot and keep the maximum Frame value for each voxel in space. This will effectively give us the last time a certain portion in space was last seen by the camera!
+- We then freeze the result at `$FEND + 1` using a `timeshift`and cache that one single frame!
+Congrats, you can now use this non-time-dependent cache to perform camera culling on all the sim layer of your setup! 
 
-We do this by running the frustum volume through a sop solver. Inside the solver we simply compare the current frame and the previous one, using a `vdbcombine` we take the maximum value of each voxel.  
-We can then freeze the result at `$FEND + 1` using a `timeshift`and cache that one single frame!
-Congrats, you can now use this non-time-dependent cache to perform camera culling on any sim layer of your setup! 
+???note "Viewport visualization"
+    The volume will look like absolute garbage in the viewport. This is because the density values will likely be very high, unless your working with a [1; N] frame range. Which is not the case, right? Right. 
 
-Below you can find an implementation of what I just described. On the next paragraph we'll have a look at a few lines of vex to perform the culling inside a solver.
+    If you want to visualize the "active" area, you can use a Volume Visualizer with Min set to `$F-1` and max set to `$F`.
 
-![Cam Frustum Trail Utility Volume Tree](../assets/pages/hou_camcull/cam_frust_nodes_all.png){: style="width:100%"}
+    <video class="video-center-80" autoplay loop muted playsinline>
+        <source src="/assets/pages/hou_camcull/cam_cull_viz.webm" type="video/webm">
+    </video>
+     
 
+Below you can find the implementation of what I just described. On the next paragraph we'll have a look at a few lines of vex to perform the culling inside a solver.
+
+<figure markdown="span">
+![Cam Frustum Trail Utility Volume Tree](/assets/pages/hou_camcull/cam_frust_nodes_all.png){: style="width:80%"}
+</figure>
 
 ??? quote "Node parameters"
     ``` json
     {
         "frustum_volume": {
             name: "last_frame",
-            initial_val: "$F",
+            initial_val: "$F", //Or $FF if you plan on storing subframe data
             dimensions: "From Camera",
             camera: "path/to/your/cam",
             zmin: 0.1,  //Use a meaningful value for your shot
@@ -87,7 +105,7 @@ Below you can find an implementation of what I just described. On the next parag
 
         "convertvdb1": {
             conversion: "VDB",
-            bdbtype: "Integer"
+            bdbtype: "Integer" //This can be skipped if you want to have subframe data
         },
 
         "vdbresample1": {
@@ -98,7 +116,7 @@ Below you can find an implementation of what I just described. On the next parag
         },
 
         "frustum_trail": {
-            startframe: 950 //Your camera range start, include preroll if needed for downstream
+            startframe: 950 //Your camera range start, include preroll if camera anim has some
         }
 
         "freeze_last": {
@@ -111,20 +129,39 @@ Below you can find an implementation of what I just described. On the next parag
 
 ## Culling - Inside the dopnet
 
-At this point everything is ready, now depending on what you're simulating follow these steps!
+At this point everything is ready, now depending on what you're simulating, you can sample the volume and reset fields/cull points/set attributes.
 
 ### Pyro simulation
 
-Create a gasfieldwrangle
+In a gasfieldwrangle, all the fields that drive the active field need to be set to 0. 
 ``` c linenums="1" title="Solver Gas Field Wrangle"
 float last_frame = volumesample(1, 0, v@P);
 
-if(@Frame > last_frame){
+if(@Frame > last_frame) {
     f@density = 0;
     f@flame = 0;
-    f@temperature = 0;
-    // fields to be set to 0, don't do it with vel unless you want the bounds to act like a collider
 }
 ```
 
+!!!warning "The `vel` field"
+    Don't set vel to 0 using this method. 
+    This results in the boundary acting similarly to a collider, let the sparse solver handle the culling of the other fields through the building/application of the active mask.
+
+!!!warning "The `active` field"
+    I don't recommend setting the `active` field directly, as it needs particular conditions to be work properly.
+    The `active` field needs to be a 16x16x16 "full tile" occupancy mask, so messing up with per-voxel 1-0 values will break things.
+    Also, depending on the Reset Rule and when you apply the culling operation, you'll likely end up having your active field being recomputed before the solve step.
+    
+    (FYI: the `active` field is rebuilt after Sourcing and Advection, and before the Forces input operators). 
+
 ### Particle simulation (also RBD and vellum)
+
+In a popwrangle, by pointing to the frustum trail path in the Inputs Tab > Input 2 > SOP
+
+``` c linenums="1" title="Solver POP Wrangle"
+float last_frame = volumesample(1, 0, v@P);
+
+if(@Frame > last_frame) {
+    i@dead = 1;
+}
+```

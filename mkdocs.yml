@@ -17,6 +17,7 @@ theme:
     - search.highlight
     - content.tabs.link
     - content.code.copy
+    - content.tooltips
   
   language: en
 
@@ -46,10 +47,16 @@ theme:
   logo: assets/images/logo.png
   favicon: assets/images/logo.png
 
+  icon:
+    annotation: material/information-slab-circle
+   
 
 plugins:
   - search
 
+extra_css:
+  - stylesheets/extra.css
+  
 extra:
   generator: false
   
@@ -79,6 +86,11 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
  
 copyright: |
   &copy; 2024 by <a href="https://github.com/giac-b" target="_blank" rel="noopener">
@@ -88,3 +100,7 @@ copyright: |
       <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f438/512.gif" alt="🐸" width="12" height="12">
     </picture>
   </a> 
+
+validation:
+  links:
+    absolute_links: relative_to_docs

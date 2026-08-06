@@ -1,0 +1,13 @@
+.md-button.download-hipfile {
+    color: #FF6600;
+}
+.md-button.download-hipfile:hover {
+    background-color: #FF6600;
+    border-color: currentColor;
+}
+
+.video-center-80 {
+    width: 80%;
+    display: block;
+    margin: auto;
+}
