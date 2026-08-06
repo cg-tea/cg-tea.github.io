@@ -24,7 +24,7 @@ Here's a simple scene showing the technique described on this page. Please feel 
 Imagine having to work on something like this:^(1)^ 
 { .annotate }
 
-1.  damn, it looks like trash, more voxels will definitely fix it
+1.  damn, it looks like trash, more voxels will definitely fix it, right?
 
 <video class="video-center-80" autoplay loop muted playsinline>
     <source src="/assets/pages/hou_camcull/final_shot.webm" type="video/webm">
@@ -52,9 +52,11 @@ If you couldn't care less, then go with Fedor's approach^(1)^, otherwise keep sc
 {.annotate}
 
 1. he'll be very happy, me on the other hand...
-<figure markdown="span">
-    ![Pyro camera cull result](/assets/pages/hou_camcull/cam_cull_witness.gif){width="80%"}
-</figure>
+
+<video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/cam_cull_witness_all_merge.webm" type="video/webm">
+</video>
+
 
 ## Camera frustum trail - `last_frame` utility volume
 
@@ -129,11 +131,16 @@ Below you can find the implementation of what I just described. On the next para
 
 ## Culling - Inside the dopnet
 
-At this point everything is ready, now depending on what you're simulating, you can sample the volume and reset fields/cull points/set attributes.
+At this point everything is ready. Depending on what you're simulating, you can sample the `last_frame` volume, compare it with the current frame and reset fields/cull points/set attributes accordingly.
+
+The code in the following wrangles assumes that the cached frustum trail is referenced in `Inputs Tab → Input 2 → SOP`.  
+This allows us to sample it with `volumesample(1, 0, v@P)`.
 
 ### Pyro simulation
 
-In a gasfieldwrangle, all the fields that drive the active field need to be set to 0. 
+In a `gasfieldwrangle`, sample the `last_frame` volume and set to 0 all the fields that drive the `active` field on the sparse solver.  
+I'd recommend connecting the microsolver to the `sources_output` Output if you're using the `Pyro Solver SOP`.
+
 ``` c linenums="1" title="Solver Gas Field Wrangle"
 float last_frame = volumesample(1, 0, v@P);
 
@@ -143,25 +150,60 @@ if(@Frame > last_frame) {
 }
 ```
 
-!!!warning "The `vel` field"
+???warning "The `vel` field"
     Don't set vel to 0 using this method. 
     This results in the boundary acting similarly to a collider, let the sparse solver handle the culling of the other fields through the building/application of the active mask.
 
-!!!warning "The `active` field"
-    I don't recommend setting the `active` field directly, as it needs particular conditions to be work properly.
+???warning "The `active` field"
+    I don't recommend setting the `active` field directly, as it needs particular conditions to work properly.
     The `active` field needs to be a 16x16x16 "full tile" occupancy mask, so messing up with per-voxel 1-0 values will break things.
     Also, depending on the Reset Rule and when you apply the culling operation, you'll likely end up having your active field being recomputed before the solve step.
     
     (FYI: the `active` field is rebuilt after Sourcing and Advection, and before the Forces input operators). 
 
-### Particle simulation (also RBD and vellum)
+???warning "Using Gas Intermittent Solve when culling (no matter the method you're using)"
+    Be aware that volume sourcing happens every subframe. If you're using Gas Intermittent Solve to run the culling operation only once per frame, this can result in things out of frustum being sourced and solved during the subframes. You'll end up seeing a trace of the source. (You might even notice the source popping, if you're using `Min Substep = 1` and `Max Substep > 1`). 
 
-In a popwrangle, by pointing to the frustum trail path in the Inputs Tab > Input 2 > SOP
+    To avoid this, you have two options:
+
+    - Run the culling operation every subframe. It should be pretty fast anyway.
+
+    - Run the (same) culling operation on the source as well. This is not a bad idea in general, as it avoids sourcing stuff that will end up being culled anyway.
+
+    <figure class="video-figure">
+        <video autoplay loop muted playsinline>
+            <source src="/assets/pages/hou_camcull/cam_cull_intermittent_merge.webm" type="video/webm">
+        </video>
+        <figcaption>
+            Without source culling (left) vs. with source culling (right).<br>
+            Gas Intermittent Solve on, 3 Substeps.
+        </figcaption>
+    </figure>
+
+### Particle simulation (POP and vellum)
+
+To kill the particles, in a `popwrangle` paste:
 
 ``` c linenums="1" title="Solver POP Wrangle"
 float last_frame = volumesample(1, 0, v@P);
 
 if(@Frame > last_frame) {
     i@dead = 1;
+}
+```
+
+???info "Sparks example"
+    <video class="video-center-80" autoplay loop muted playsinline>
+        <source src="/assets/pages/hou_camcull/cam_cull_pop.webm" type="video/webm">
+    </video>
+
+If you need your pointcount to stay consistent instead, you can stop the points instead.
+
+``` c linenums="1" title="Solver POP Wrangle"
+float last_frame = volumesample(1, 0, v@P);
+
+if(@Frame > last_frame) {
+    i@stopped = 3; // stopped = 1 also works, but 3 skips rotation integration as well
+    i@isgrain = 0; // Makes sense in vellum, if you want to remove the point from particle collisions
 }
 ```
