@@ -141,7 +141,7 @@ This allows us to sample it with `volumesample(1, 0, v@P)`.
 In a `gasfieldwrangle`, sample the `last_frame` volume and set to 0 all the fields that drive the `active` field on the sparse solver.  
 I'd recommend connecting the microsolver to the `sources_output` Output if you're using the `Pyro Solver SOP`.
 
-``` c linenums="1" title="Solver Gas Field Wrangle"
+``` c linenums="1" title="Gas Field Wrangle"
 float last_frame = volumesample(1, 0, v@P);
 
 if(@Frame > last_frame) {
@@ -184,7 +184,7 @@ if(@Frame > last_frame) {
 
 To kill the particles, in a `popwrangle` paste:
 
-``` c linenums="1" title="Solver POP Wrangle"
+``` c linenums="1" title="POP Wrangle - Kill"
 float last_frame = volumesample(1, 0, v@P);
 
 if(@Frame > last_frame) {
@@ -192,18 +192,74 @@ if(@Frame > last_frame) {
 }
 ```
 
-???info "Sparks example"
-    <video class="video-center-80" autoplay loop muted playsinline>
-        <source src="/assets/pages/hou_camcull/cam_cull_pop.webm" type="video/webm">
-    </video>
-
 If you need your pointcount to stay consistent instead, you can stop the points instead.
 
-``` c linenums="1" title="Solver POP Wrangle"
+``` c linenums="1" title="POP Wrangle - Stop"
 float last_frame = volumesample(1, 0, v@P);
 
 if(@Frame > last_frame) {
-    i@stopped = 3; // stopped = 1 also works, but 3 skips rotation integration as well
-    i@isgrain = 0; // Makes sense in vellum, if you want to remove the point from particle collisions
+    i@stopped = 3; // stopped = 1 also works, but 3 skips rotation integration as well.
+    i@isgrain = 0; // Makes sense in vellum, ignore the point for particle collisions.
+
+    i@group___cam_cull = 1; // Optional. For post-sim filtering.
+    // Storing the deactivation frame could also be useful.
+}
+```
+
+???note "What about MPM?"
+    Why are you bothering me? Are you doing mograph?  
+    Just kidding, thing is, I didn't have much time to use the solver in production. From some quick testing tho, the following should work:
+
+    ``` c linenums="1" title="POP Wrangle - Kill"
+    float last_frame = volumesample(1, 0, v@P);
+
+    if(@Frame > last_frame) {
+        i@dead = 1;
+    }
+    ```
+
+    But there's a catch. Particle reaping only happens if the `hasdead` attribute is present. I couldn't find what triggers its creation (hou 20.5), so we're simply going to force it with a Geometry Wrangle set to Run Over Detail.  
+    (We could be more sophisticated: check whether any points need to be deleted, and only enable the solver when necessary. This would be a good idea since dead particles are removed using `removepoint()`, which is slower than a `blast` node. But whatever).
+
+    ``` c linenums="1" title="Geoemtry Wrangle - Detail - Enable particle reaping"
+    i@hasdead = 1;
+    ```
+
+
+    If instead you'd like to stop the points, it'll be easier (starting Houdini 21, see [Auto Sleep](https://www.sidefx.com/docs/houdini/mpm/sleep.html):
+    
+    ``` c linenums="1" title="POP Wrangle - Kill"
+    float last_frame = volumesample(1, 0, v@P);
+
+    if(@Frame > last_frame) {
+        i@state = 0;
+    }
+    ```
+
+
+
+### RBD solver
+
+Similar to particles, we're going to use a `popwrangle`. To kill the out-of-frustum pieces use:
+
+``` c linenums="1" title="POP Wrangle - Kill"
+float last_frame = volumesample(1, 0, v@P);
+
+if(@Frame > last_frame) {
+    i@dead = 1;
+}
+```
+
+To simply stop the pieces instead:
+
+``` c linenums="1" title="POP Wrangle - Stop"
+float last_frame = volumesample(1, 0, v@P);
+
+if(@Frame > last_frame) {
+    i@active = 0; // Sets the object as static. 
+    i@bullet_ignore = 1; // Ignores the piece entirely when computing bullet collisions.
+
+    i@group___cam_cull = 1; // Optional. For post-sim filtering.
+    // Storing the deactivation frame could also be useful.
 }
 ```
