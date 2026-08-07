@@ -1,0 +1,1149 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A small wiki that collects notes, scripts, setups and documentation for VFX artists and TDs. ☕ Welcome, please have a sip.">
+      
+      
+        <meta name="author" content="Giacomo Balma">
+      
+      
+        <link rel="canonical" href="https://cgtea.github.io/houdini/cam_cull/">
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../somevex/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Frustum cull simulations and moving cameras - CG Tea</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+  
+  
+  
+  
+  <style>:root{--md-annotation-icon:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M12%2022c5.5%200%2010-4.5%2010-10S17.5%202%2012%202%202%206.5%202%2012s4.5%2010%2010%2010M11%207h2v2h-2zm3%2010h-4v-2h1v-2h-1v-2h3v4h1z%22/%3E%3C/svg%3E');}</style>
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/animations.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frustum-cull-simulations-and-moving-cameras" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="CG Tea" class="md-header__button md-logo" aria-label="CG Tea" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CG Tea
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Frustum cull simulations and moving cameras
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Houdini
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../katana/somelua/" class="md-tabs__link">
+          
+  
+  
+  Katana
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="CG Tea" class="md-nav__button md-logo" aria-label="CG Tea" data-md-component="logo">
+      
+  <img src="../../assets/images/logo.png" alt="logo">
+
+    </a>
+    CG Tea
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Houdini
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Houdini
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frustum cull simulations and moving cameras
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frustum cull simulations and moving cameras
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#houdini-sample-scene" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Houdini sample scene
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#camera-frustum-trail-last_frame-utility-volume" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Camera frustum trail - last_frame utility volume
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#culling-inside-the-dopnet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Culling - Inside the dopnet
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Culling - Inside the dopnet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyro-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pyro simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#particle-simulation-pop-and-vellum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Particle simulation (POP and vellum)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbd-solver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBD solver
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extra-more-than-just-frustum-based-masking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extra: more than just frustum based masking
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../somevex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A little bit of this, a little bit of vex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Katana
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Katana
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../katana/somelua/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coming Soon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Houdini
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="frustum-cull-simulations-and-moving-cameras">Frustum cull simulations and moving cameras</h1>
+<p>When working on heavy simulations, sooner or later, it gets to the point where some degree optimization is needed. Maybe to squeeze in that extra bit of detail but <a href="javascript:void(0);" title="in this economy, man...">RAM is not enough</a>, or simply because an iteration already takes 2 days. <br />
+More generally, we'd love things to go through the farm without someone from system (or production) yelling from across the studio. Or worse, our workstation going <strong><code class="highlight-red-black">Fatal error: Segmentation fault</code></strong>.</p>
+<p class="annotate">On top of clustering, a very common operation in these situations is <strong>camera culling at simulation time</strong>.<sup>(1)</sup> <br />
+Depending on the solver you're using, you might opt for a <em>toNDC-check</em> or a <em>volumesample-the-frustum</em> approach, you name it.<br /></p>
+<ol>
+<li>me coming at you like "here, have some of my latest discovery" <em>proceeds to show a glass of water</em></li>
+</ol>
+<p>Unfortunately, camera culling in a solver doesn't really do well in those scenarios where the simulation must be computed in regions that are <strong>currently NOT</strong> framed by the camera, <strong>but</strong> that <strong>will</strong> eventually <strong>be</strong>. Those regions therefore cannot simply be culled, as this would prevent the simulated objects from being present when they are needed (<em>duh</em><span class="twemoji anim-pulse-big-brain"><?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 416 510">
+    <defs>
+        <style>
+            .cls-1 {
+                stroke-width: 0px;
+            }
+        </style>
+    </defs>
+
+    <path d="M0 0 C1.00691895 0.20898926 2.01383789 0.41797852 3.05126953 0.63330078 C47.07058243 10.05240364 87.74232509 30.49421547 120 62 C120.84099243 62.80920898 120.84099243 62.80920898 121.69897461 63.63476562 C137.54226971 79.10951057 149.25361354 98.59471045 155 120 C155.18038818 120.65790527 155.36077637 121.31581055 155.54663086 121.99365234 C170.95612912 183.34076945 127.99513837 270.69627398 97.62280273 321.44848633 C87.22457246 338.60843273 75.80244572 355.38399549 62 370 C60.93277054 371.24596449 59.87020443 372.49593956 58.8125 373.75 C34.05478572 401.90694279 -1.3241281 427.42447024 -40 430 C-46.66810673 430.18301018 -53.33138866 430.11967598 -60 430 C-59.67 430.66 -59.34 431.32 -59 432 C-58.45471892 438.43431679 -59.31543223 441.68988763 -63 447 C-63.66 447.33 -64.32 447.66 -65 448 C-64.175 448.845625 -63.35 449.69125 -62.5 450.5625 C-60.36467649 453.14066049 -59.99855696 454.01010131 -59.5 457.5 C-60.04453741 461.31176186 -60.90089073 463.77636791 -63 467 C-65.1875 468.375 -65.1875 468.375 -67 469 C-66.505 469.70125 -66.01 470.4025 -65.5 471.125 C-63.73117712 474.51524386 -63.46063792 476.22446543 -64 480 C-66.57031493 485.14062986 -69.84047149 487.72880398 -75 490 C-93.29969762 495.8076403 -115.89790495 500.80715702 -134 492 C-147.67974375 484.86699076 -156.19326179 475.37124883 -162 461 C-166.18316335 446.97778576 -166.68980089 433.53637759 -159.8125 420.3125 C-154.66965815 412.15534467 -146.93594316 405.61540544 -140 399 C-141.44757105 395.95406114 -142.68015572 394.18754024 -145.3125 392.0625 C-155.60767251 383.29668283 -164.58466006 373.60261773 -172.66601562 362.77832031 C-173.98319854 361.02239785 -175.32501628 359.28790788 -176.671875 357.5546875 C-184.782601 346.97445771 -191.42760096 335.57972732 -198 324 C-198.38784668 323.32501465 -198.77569336 322.6500293 -199.17529297 321.95458984 C-221.08231662 283.64559545 -234.02047449 239.80878699 -243.56713867 196.94195557 C-243.98404985 195.07155753 -244.40694578 193.20249657 -244.83007812 191.33349609 C-252.88058863 155.08097791 -249.27780627 124.60390037 -229.62890625 92.99609375 C-222.3143083 81.65696524 -213.30887935 71.71866127 -204 62 C-203.29101562 61.24976562 -202.58203125 60.49953125 -201.8515625 59.7265625 C-172.79946596 29.72582607 -132.18842013 9.74131561 -92 0 C-91.14293457 -0.21172852 -90.28586914 -0.42345703 -89.40283203 -0.64160156 C-60.90140926 -7.350946 -28.50203592 -6.02155688 0 0 Z " fill="#FECA4B" transform="translate(249,4)"/>
+
+    <path d="M0 0 C5.5998926 1.03593127 9.36593778 5.11184459 12.8515625 9.34765625 C19.19178503 18.79548081 20.05751878 29.37118956 19.23828125 40.4140625 C17.76477066 46.33864396 15.25932892 50.81857944 11.23828125 55.4140625 C11.23828125 56.0740625 11.23828125 56.7340625 11.23828125 57.4140625 C18.85748489 56.83379202 26.08753767 55.11844825 33.47937012 53.26205444 C37.13798097 52.34394843 40.80139467 51.44544788 44.46484375 50.546875 C45.203396 50.36543442 45.94194824 50.18399384 46.70288086 49.99705505 C56.82519017 47.5213723 67.0055036 45.30841607 77.1875 43.09326172 C81.56572842 42.11853129 85.92719758 41.07403526 90.28808594 40.0246582 C94.6229278 39.12748512 98.86547149 38.51832866 103.23828125 39.4140625 C106.06252413 41.60429168 107.65336728 43.24423457 109.23828125 46.4140625 C109.66700678 50.18684717 109.36141217 52.16287542 107.67578125 55.6015625 C102.22954222 61.88568446 93.39235883 62.66296867 85.61328125 64.3515625 C76.67937327 66.34503799 67.90212691 68.43257715 59.23828125 71.4140625 C60.04265625 72.0328125 60.84703125 72.6515625 61.67578125 73.2890625 C64.23828125 75.4140625 64.23828125 75.4140625 65.23828125 77.4140625 C65.78356233 83.84837929 64.92284902 87.10395013 61.23828125 92.4140625 C60.24828125 92.9090625 60.24828125 92.9090625 59.23828125 93.4140625 C60.06328125 94.2596875 60.88828125 95.1053125 61.73828125 95.9765625 C63.87360476 98.55472299 64.23972429 99.42416381 64.73828125 102.9140625 C64.19374384 106.72582436 63.33739052 109.19043041 61.23828125 112.4140625 C59.05078125 113.7890625 59.05078125 113.7890625 57.23828125 114.4140625 C57.73328125 115.1153125 58.22828125 115.8165625 58.73828125 116.5390625 C60.50710413 119.92930636 60.77764333 121.63852793 60.23828125 125.4140625 C57.66796632 130.55469236 54.39780976 133.14286648 49.23828125 135.4140625 C30.93858363 141.2217028 8.3403763 146.22121952 -9.76171875 137.4140625 C-23.4414625 130.28105326 -31.95498054 120.78531133 -37.76171875 106.4140625 C-41.62963877 93.44856282 -42.72117598 80.43267477 -36.5715332 68.00976562 C-32.83066055 61.58515174 -28.43503139 56.5968555 -23.07421875 51.4765625 C-22.31560547 50.73599609 -21.55699219 49.99542969 -20.77539062 49.23242188 C-19.37743466 47.86901381 -17.97536975 46.5097948 -16.56762695 45.15649414 C-15.97167725 44.5814917 -15.37572754 44.00648926 -14.76171875 43.4140625 C-14.22313232 42.90157959 -13.6845459 42.38909668 -13.12963867 41.86108398 C-7.99547601 36.43003239 -8.38142304 29.84137054 -8.5234375 22.79296875 C-8.80863373 18.74879264 -9.65073437 15.30250784 -10.76171875 11.4140625 C-11.20557196 7.64131023 -11.02717554 5.94497609 -9.32421875 2.5390625 C-6.0744118 -0.15589936 -4.12576391 -0.25659415 0 0 Z " fill="#F19020" transform="translate(124.76171875,358.5859375)"/>
+
+    <path d="M0 0 C1.13308594 -0.00708984 2.26617187 -0.01417969 3.43359375 -0.02148438 C13.59665753 0.05418563 23.08542864 1.73656011 32.125 6.5 C33.10726562 7.00660156 34.08953125 7.51320313 35.1015625 8.03515625 C37.5 9.4375 37.5 9.4375 39.5 11.4375 C39.8267107 14.50858055 39.98138276 16.58800101 38.4375 19.3125 C35.29391507 21.13780738 33.09201524 20.84305011 29.5 20.4375 C27.21726527 19.55023267 25.03926829 18.52131373 22.83203125 17.4609375 C17.28407423 15.02615569 11.53968429 14.1277726 5.5 14.4375 C6.263125 15.118125 7.02625 15.79875 7.8125 16.5 C13.47032826 22.68413787 14.0640689 28.08189061 13.84765625 36.27734375 C13.18474928 42.30309367 10.96486886 46.38956058 6.4375 50.375 C2.0394838 53.46296882 -1.18781324 53.88768532 -6.5 53.4375 C-12.59109776 50.21280119 -16.3333582 45.95602317 -18.5 39.4375 C-19.38448701 30.36289297 -18.55114697 24.01422045 -13.5 16.4375 C-14.16386719 16.55609375 -14.82773438 16.6746875 -15.51171875 16.796875 C-22.68644068 17.84427966 -22.68644068 17.84427966 -26.625 15.875 C-28.5 13.4375 -28.5 13.4375 -29 10.375 C-28.43513465 7.05641608 -28.046505 6.48774001 -25.5 4.4375 C-17.17056612 0.50831761 -9.08197695 -0.16014863 0 0 Z " fill="#67481B" transform="translate(241.5,306.5625)"/>
+
+    <path d="M0 0 C5.56601815 3.45577127 9.29097712 7.5911642 11 14 C11.8881316 21.39734924 11.13426551 27.7007493 7 34 C3.80825774 37.92766211 0.57994386 40.24456659 -4.4375 41.1875 C-8.76867339 41.36458375 -11.71574513 40.30750605 -15.203125 37.76171875 C-20.4305276 32.63659142 -22.30525723 26.7031526 -22.6875 19.5 C-22.37216383 12.08084074 -19.78036616 6.54634349 -14.359375 1.4609375 C-9.76560255 -1.69459778 -5.08759785 -1.7889495 0 0 Z " fill="#67491B" transform="translate(157,311)"/>
+
+    <path d="M0 0 C1 1 1 1 1.25 4.375 C1 8 1 8 -0.125 9.9375 C-3.1099057 11.62894656 -4.56572245 11.56197269 -8 11 C-9.5494774 10.1326295 -11.06769256 9.20852101 -12.5625 8.25 C-23.53865992 1.30884681 -34.47302629 0.49791535 -47.0625 1 C-49.80331633 1.10679744 -52.5430411 1.18625797 -55.28515625 1.25 C-56.48019775 1.29640625 -57.67523926 1.3428125 -58.90649414 1.390625 C-62 1 -62 1 -64.42749023 -0.7890625 C-66 -3 -66 -3 -65.875 -6.625 C-65 -10 -65 -10 -63 -12 C-41.78376292 -17.85524771 -17.38605157 -13.54699957 0 0 Z " fill="#694A1C" transform="translate(225,381)"/>
+    
+    <path d="M0 0 C1.39935013 2.79870027 1.25265405 4.90498792 1 8 C-0.2578125 9.69921875 -0.2578125 9.69921875 -2 11 C-7.47322991 11.50555939 -12.87230737 9.49160565 -17.9609375 7.69921875 C-30.49055595 3.40266376 -45.05363379 6.17235886 -57 11 C-60.66207884 11.44841782 -62.30472525 11.4757143 -65.375 9.375 C-67 7 -67 7 -67.625 4 C-67 1 -67 1 -64.8125 -1.125 C-45.99393164 -11.85921918 -18.4011759 -11.04070554 0 0 Z " fill="#694A1C" transform="translate(185,283)"/>
+</svg>
+</span>).</p>
+<p class="annotate">So how do we keep out-of-frustum stuff simming while still getting rid of it as soon as it leaves the camera?<sup>(1)</sup> </p>
+<ol>
+<li>and without using any keyframe, hate those</li>
+</ol>
+<h2 id="houdini-sample-scene">Houdini sample scene</h2>
+<p>Here's a simple scene demonstrating the technique covered on this page. Please feel free to download and check it yourself.</p>
+<p><a class="md-button download-hipfile" href="../../assets/projectfiles/houdini/pyro_culling_trail.git_v001.hipnc" title="Not a virus, I swear, it goes to github. Designing a download button that doesn't look scammy is harder than I thought. Years of Softonic 'free downloads' ruined me."><span class="twemoji"><?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M0,409.03v90.98h79.64C40.95,477.98,13.61,444.5,0,409.03Z"/>
+  <path class="cls-1" d="M334.21,314.15c-.11-84.06-67.58-165-168.98-168.5-71.84-2.48-127.74,23.87-165.23,62.8v87.76c25.49-73.63,95.73-107.41,154.58-106.82,73.52.74,130.23,56.19,130.56,118.87.32,59.91-24.78,104.01-92.52,114.88-36.93,5.93-94.73-15.73-92.16-71.53,1.33-28.77,23.73-45.02,49.41-43.84-25.12,33.66,8.14,58.34,31.66,53.31,29.11-6.22,40.97-32.07,40.97-52.13,0-21.15-19.93-55.32-69.4-54.15-61.22,1.45-99.74,45.49-101.04,99.93-1.63,68.56,62.49,113.62,128.31,114.44,96.63,1.2,153.96-62.19,153.83-155.02Z"/>
+  <path class="cls-1" d="M0,0v143.85c43-33,98.96-54.35,165.23-54.31,141.87.08,231.94,99.21,231.9,224.27-.03,86.88-40.57,152.21-104.05,186.2h206.92V0H0Z"/>
+</svg></span> Hipfile Download</a></p>
+<p class="annotate">That said, if you're down for some yapping (or downloads are blocked by your studio lol), keep reading.<br />
+Imagine having to work on something like this:<sup>(1)</sup> </p>
+<ol>
+<li>damn boi, it looks like trash, lack of resolution is definitely the main issue here...</li>
+</ol>
+<video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/final_shot.webm" type="video/webm">
+</video>
+
+<p>This (amazing) shot features:</p>
+<ul>
+<li>
+<p>a bunch of <a href="javascript:void(0);" title="not ILM™ looking, and a bit out of scale">smoke plumes</a> that need preroll before they appear in frame</p>
+</li>
+<li>
+<p>an <a href="javascript:void(0);" title="not quite Michael Bay™ worthy">explosion</a> happening out of camera</p>
+</li>
+<li>
+<p>camera traveling a decent distance, looking back and then moving forward again</p>
+</li>
+</ul>
+<p>As I said before, I'd like to camera cull my sims as soon as they're not needed anymore (ie: left behind).<br />
+There are a few ways to achieve what we're looking for.  </p>
+<div class="admonition example">
+<p class="admonition-title">Fedor's Take</p>
+<p>My dear deskmate, Fedor Koleganov, once showed me his approach to these kinds of situation. <br />
+Starting from the current frame, trail the camera frustum forward until the end of the shot range. Make a VDB out of it. Cache one for each frame. Then <code>volumesample</code> it at sim time: if the particle/voxel is outside, blast it/deactivate it &gt; done!<br />
+Given a frame, trailing the camera frustum until the end of the shot returns an active area that covers everything that's going to be needed <em>"in the future"</em>, while excluding everything that's already <em>"gone"</em>. Pretty cool uh? </p>
+</div>
+<p class="annotate">While Fedor's solution is valid, since 80% of my time in the studio consists of arguing with him, I tried to come up with a non-time-dependent version of it. That is to say, I want to load my culling grid only once, instead of having to load a different masking volume for each frame.<br />
+If you couldn't care less, then go with Fedor's approach<sup>(1)</sup>, otherwise keep scrolling to see how we get to this:</p>
+<ol>
+<li>he'll be very happy, me on the other hand...</li>
+</ol>
+<video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/cam_cull_witness_all_merge.webm" type="video/webm">
+</video>
+
+<details class="tip" open="open">
+<summary>Tip</summary>
+<p>And, if you're really into this, something more advanced, like occlusion culling and custom areas masking (always following the same <em>preroll-friendly</em> and <em>non-time-dependent</em> approach):</p>
+<p><video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/cam_cull_occlusion.webm" type="video/webm">
+</video></p>
+</details>
+<h2 id="camera-frustum-trail-last_frame-utility-volume">Camera frustum trail - <code>last_frame</code> utility volume</h2>
+<p>This solution will also use a camera frustum volume trail.<br />
+To achieve a non-time-dependent version though, we're not going to use a 0-1 masking value. Instead, let's treat the volume as a utility grid where voxels store the <em>last frame</em> at which that portion of space was effectively "seen" by the camera. It's pretty straightforward:</p>
+<ul>
+<li>
+<p>First, we generate a volume grid representing the camera frustum. The volume can be quite low-res as it will simply act as a mask.<br />
+We assign the whole volume a density value of <code>$F</code>.<br />
+Now, the region of space seen by the camera at the current frame has a value equal to the current frame (<em>duh</em>).</p>
+</li>
+<li>
+<p>We then repeat this for each frame of the shot, storing in a final grid the maximum Frame value for each voxel in space. This will effectively give us the last time a certain portion of space was last seen by the camera!<br />
+We can achieve this with a simple sop solver. Inside the solver we compare the current frame and the previous one, using a <code>vdbcombine</code> we keep the maximum value.  </p>
+</li>
+<li>
+<p>We then freeze the result at <code>$FEND + 1</code> using a <code>timeshift</code>and cache that one single frame!
+Congrats, you can now use this non-time-dependent cache to perform camera culling on all the sim layer of your setup! </p>
+</li>
+</ul>
+<details class="note">
+<summary>Viewport visualization</summary>
+<p>The volume will look like absolute garbage in the viewport. This is because the density values will likely be very high, unless your working with a [1; N] frame range. Which is not the case, right? Right. </p>
+<p>If you want to visualize the "active" area, you can use a Volume Visualizer with Min set to <code>$F-1</code> and max set to <code>$F</code>.</p>
+<p><video class="video-center-80" autoplay loop muted playsinline>
+    <source src="/assets/pages/hou_camcull/cam_cull_viz.webm" type="video/webm">
+</video></p>
+</details>
+<p>Below you can find the implementation of what I just described. On the next paragraph we'll have a look at a few lines of vex to perform the culling inside a solver.</p>
+<figure>
+<img alt="Cam Frustum Trail Utility Volume Tree" src="../../assets/pages/hou_camcull/cam_frust_nodes_all.png" style="width:80%" />
+</figure>
+<details class="quote">
+<summary>Node parameters</summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&quot;frustum_volume&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;last_frame&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ial_val</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$F&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">//Or $FF if you plan on storing subframe data</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="err">dime</span><span class="kc">ns</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;From Camera&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="err">camera</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path/to/your/cam&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="err">zmi</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w">  </span><span class="c1">//Use a meaningful value for your shot</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="err">zmax</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w">   </span><span class="c1">//Use a meaningful value for your shot</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="err">wi</span><span class="kc">n</span><span class="err">xmi</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1</span><span class="p">,</span><span class="w"> </span><span class="err">wi</span><span class="kc">n</span><span class="err">xmax</span><span class="p">:</span><span class="w"> </span><span class="mf">1.1</span><span class="p">,</span><span class="w"> </span><span class="c1">//A touch of padding</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="err">wi</span><span class="kc">n</span><span class="err">ymi</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1</span><span class="p">,</span><span class="w"> </span><span class="err">wi</span><span class="kc">n</span><span class="err">ymax</span><span class="p">:</span><span class="w"> </span><span class="mf">1.1</span><span class="p">,</span><span class="w"> </span><span class="c1">//A touch of padding</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="err">u</span><span class="kc">n</span><span class="err">i</span><span class="kc">f</span><span class="err">ormsamples</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;By Size&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="err">divsize</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;convertvdb1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="err">co</span><span class="kc">n</span><span class="err">versio</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VDB&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="err">bdb</span><span class="kc">t</span><span class="err">ype</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Integer&quot;</span><span class="w"> </span><span class="c1">//This can be skipped if you want to have subframe data</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nt">&quot;vdbresample1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">        </span><span class="err">order</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Nearest&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">        </span><span class="err">mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Using Voxel Size Only&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="err">voxelsize</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">        </span><span class="err">li</span><span class="kc">near</span><span class="err">x</span><span class="kc">f</span><span class="err">orm</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="w"> </span><span class="c1">//Force Axis Aligned! This is very important, VDB combine will act weird otherwise! </span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="nt">&quot;frustum_trail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">        </span><span class="err">s</span><span class="kc">tartfra</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="mi">950</span><span class="w"> </span><span class="c1">//Your camera range start, include preroll if camera anim has some</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="nt">&quot;freeze_last&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">        </span><span class="kc">fra</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$FEND + 1&quot;</span><span class="w"> </span><span class="c1">//End of your shot, plus one to avoid disappearing stuff on the last frame</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="p">}</span>
+</code></pre></div>
+</details>
+<h2 id="culling-inside-the-dopnet">Culling - Inside the dopnet</h2>
+<p>At this point everything is ready. Depending on what you're simulating, you can sample the <code>last_frame</code> volume, compare it with the current frame and reset fields/cull points/set attributes accordingly.</p>
+<p>The code in the following wrangles assumes that the cached frustum trail is referenced in <code>Inputs Tab → Input 2 → SOP</code>.<br />
+This allows us to sample it with <code>volumesample(1, 0, v@P)</code>.</p>
+<h3 id="pyro-simulation">Pyro simulation</h3>
+<p>In a <code>gasfieldwrangle</code>, sample the <code>last_frame</code> volume and set to 0 all the fields that drive the <code>active</code> field on the sparse solver.<br />
+I'd recommend connecting the microsolver to the <code>sources_output</code> Output if you're using the <code>Pyro Solver SOP</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Gas Field Wrangle</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span>
+<span class="normal"><a href="#__codelineno-1-5">5</a></span>
+<span class="normal"><a href="#__codelineno-1-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="w">    </span><span class="n">f</span><span class="err">@</span><span class="n">density</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="w">    </span><span class="n">f</span><span class="err">@</span><span class="n">flame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<details class="warning">
+<summary>The <code>vel</code> field</summary>
+<p>Don't set <code>vel</code> to 0 using this method. 
+This results in the boundary acting similarly to a collider, let the sparse solver handle the culling of the other fields through the internal application of the active mask.</p>
+</details>
+<details class="warning">
+<summary>The <code>active</code> field</summary>
+<p>I don't recommend setting the <code>active</code> field directly, as it needs particular conditions to work properly.
+The <code>active</code> field needs to be a 16x16x16 "full tile" occupancy mask, so messing up with per-voxel values will break things.
+Also, depending on the Reset Rule and when you apply the culling operation, you'll likely end up having your active field being recomputed before the solve step.</p>
+<p>(FYI: the <code>active</code> field is rebuilt after Sourcing and Advection, and before the Forces input operators). </p>
+</details>
+<details class="warning">
+<summary>Using Gas Intermittent Solve when culling (no matter the method you're using)</summary>
+<p>Be aware that volume sourcing happens every subframe. If your sim has substeps (as it should) and you're using Gas Intermittent Solve to run the culling operation only once per frame, this will result in things out of frustum being sourced and solved during the subframes. You'll end up seeing a trace of the source. (You might even notice the source popping, if you're using <code>Min Substep = 1</code> and <code>Max Substep &gt; 1</code>). </p>
+<p>To avoid this, you have two options:</p>
+<ul>
+<li>
+<p>Perform the culling operation every subframe. It should be pretty fast anyway.</p>
+</li>
+<li>
+<p>Perform the (same) culling operation on the source as well. This is not a bad idea in general, as it avoids sourcing stuff that will end up being culled anyway. Just run the source volume through the same snippet using a volumewrangle.<br />
+Or even better, on a point wrangle before the rasterization. You can easily group the points doing something like: <br />
+<code>i@group_blast = @Frame &gt; volumesample(1, 0, v@P);</code>.</p>
+</li>
+</ul>
+<p><figure class="video-figure">
+    <video autoplay loop muted playsinline>
+        <source src="/assets/pages/hou_camcull/cam_cull_intermittent_merge.webm" type="video/webm">
+    </video>
+    <figcaption>
+        Without source culling (left) vs. with source culling (right).<br>
+        Gas Intermittent Solve on, 3 Substeps.
+    </figcaption>
+</figure></p>
+</details>
+<h3 id="particle-simulation-pop-and-vellum">Particle simulation (POP and vellum)</h3>
+<p>To kill the particles, in a <code>popwrangle</code> paste:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Kill</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span>
+<span class="normal"><a href="#__codelineno-2-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">dead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p>Most solvers know how to handle the <code>i@dead</code> attribute, ensuring that points are culled at the right moment.<br />
+If you need your pointcount to stay consistent, you can stop the points instead.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Stop</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span>
+<span class="normal"><a href="#__codelineno-3-5">5</a></span>
+<span class="normal"><a href="#__codelineno-3-6">6</a></span>
+<span class="normal"><a href="#__codelineno-3-7">7</a></span>
+<span class="normal"><a href="#__codelineno-3-8">8</a></span>
+<span class="normal"><a href="#__codelineno-3-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">stopped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="c1">// stopped = 1 also works, but 3 skips the integration of rotations as well.</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">isgrain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Only makes sense in vellum, ignores the point for particle-to-particle interaction.</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">group___cam_cull</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Optional. For post-sim filtering.</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">    </span><span class="c1">// Storing the deactivation frame could also be useful.</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<details class="question">
+<summary>What about MPM?</summary>
+<p>Why are you bothering me? Are you doing mograph?<br />
+Just kidding, thing is, I didn't have much time to use the solver in production. From some quick testing tho, the following should work:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Kill</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span>
+<span class="normal"><a href="#__codelineno-4-3">3</a></span>
+<span class="normal"><a href="#__codelineno-4-4">4</a></span>
+<span class="normal"><a href="#__codelineno-4-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">dead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p class="annotate">But there's a catch. Particle removal only happens if the <code>hasdead</code> detail attribute is present. At the moment of testing (hou 20.5), I couldn't find what triggers its creation<sup>(1)</sup>, so we're simply going to force it with a Geometry Wrangle set to Run Over Detail.<br /></p>
+<ol>
+<li>I'm <em>SURE</em> newer versions of Houdini will fix this (right, SideFX?). If that happens you can skip the following.</li>
+</ol>
+<details class="tip" open="open">
+<summary>Is culling needed every frame?</summary>
+<p>We could be more sophisticated: every frame, check whether any points have <code>i@dead = 1</code>, and only enable the Geometry Wrangle when necessary.<br />
+This would be a good idea since dead particles are later removed using <code>removepoint()</code> in vex, which is not ideal when running on all points with an if statement. But whatever.</p>
+</details>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Geoemtry Wrangle - Detail - Enable particle reaping</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="n">i</span><span class="err">@</span><span class="n">hasdead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div></td></tr></table></div>
+<p>If instead you'd like to stop the points, it'll be easier (but only starting Houdini 21, see <a href="https://www.sidefx.com/docs/houdini/mpm/sleep.html">Auto Sleep</a>):</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Kill</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span>
+<span class="normal"><a href="#__codelineno-6-3">3</a></span>
+<span class="normal"><a href="#__codelineno-6-4">4</a></span>
+<span class="normal"><a href="#__codelineno-6-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Equivalent to i@stopped = 1;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<h3 id="rbd-solver">RBD solver</h3>
+<p>Similar to particles, we're going to use a <code>popwrangle</code>. Again, to kill the out-of-frustum pieces use:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Kill</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span>
+<span class="normal"><a href="#__codelineno-7-2">2</a></span>
+<span class="normal"><a href="#__codelineno-7-3">3</a></span>
+<span class="normal"><a href="#__codelineno-7-4">4</a></span>
+<span class="normal"><a href="#__codelineno-7-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">dead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p>To simply stop the pieces instead:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">POP Wrangle - Stop</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span>
+<span class="normal"><a href="#__codelineno-8-2">2</a></span>
+<span class="normal"><a href="#__codelineno-8-3">3</a></span>
+<span class="normal"><a href="#__codelineno-8-4">4</a></span>
+<span class="normal"><a href="#__codelineno-8-5">5</a></span>
+<span class="normal"><a href="#__codelineno-8-6">6</a></span>
+<span class="normal"><a href="#__codelineno-8-7">7</a></span>
+<span class="normal"><a href="#__codelineno-8-8">8</a></span>
+<span class="normal"><a href="#__codelineno-8-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="kt">float</span><span class="w"> </span><span class="n">last_frame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volumesample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="err">@</span><span class="n">P</span><span class="p">);</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="k">if</span><span class="p">(</span><span class="err">@</span><span class="n">Frame</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">last_frame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Sets the object as static. </span>
+<a id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">bullet_ignore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Ignores the piece entirely when computing bullet collisions.</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="w">    </span><span class="n">i</span><span class="err">@</span><span class="n">group___cam_cull</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Optional. For post-sim filtering.</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8"></a><span class="w">    </span><span class="c1">// Storing the deactivation frame could also be useful.</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9"></a><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="extra-more-than-just-frustum-based-masking">Extra: more than just frustum based masking</h2>
+<p>The cool thing about this utility volume is that we are not limited to the camera frustum. We can further customize the mask. We have two ways of doing so:</p>
+<ol>
+<li>
+<p><strong>Protect certain regions</strong>. This can be easily achieved by vdb-merging a custom volume (e.g. a box) with a i@last_frame that is high enough (e.g. <code>i@last_frame = 99999</code>) to prevent any object from being culled. Of course this can also be more sophisticated, for example protecting things only during the preroll (e.g. <code>i@last_frame = 1001</code>). </p>
+</li>
+<li>
+<p class="annotate"><strong>Carve out certain regions</strong>. This can be achieved by clipping away parts of the volume. (Remember, if no volume is found when sampling this results in culling!) For example you can use this to remove smoke that somehow got inside a collider<sup>(1)</sup>, or even behind it (say, dust rolling behind a building)!<br />
+I'd recommend checking out <code>vdbocclusionmask</code>. Given a camera, it's a great tool that can help you compute regions of space that are occluded by an object.<br />
+When masking VDB areas, <code>vdbclip</code> is your friend, use the Mask VDB mode.</p>
+<ol>
+<li>Potentially allowing you to use a smaller Interior Band when generating your collision sdf.</li>
+</ol>
+</li>
+</ol>
+<p>Both operations if needed, for example in case of animated colliders, can be performed on the frustum volume <strong>before</strong> the SOP solver. This will ensure that each frame gets the proper masking, the max-merging operation will take care of the rest!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2026 by <a href="https://github.com/giac-b" target="_blank" rel="noopener">
+  Giacomo Balma
+  <picture>
+    <source srcset="https://fonts.gstatic.com/s/e/notoemoji/latest/1f438/512.webp" type="image/webp">
+    <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f438/512.gif" alt="🐸" width="12" height="12">
+  </picture>
+</a> 
+
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.path", "navigation.tabs", "toc.integrate", "toc.follow", "header.autohide", "search.suggest", "search.highlight", "content.tabs.link", "content.code.copy", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
