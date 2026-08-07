@@ -11,3 +11,19 @@
     display: block;
     margin: auto;
 }
+
+.md-typeset code.highlight-yellow,
+.md-typeset mark.highlight-yellow {
+  background-color: rgba(240, 240, 0, 1); 
+  color : rgba(0, 0, 0, 1); 
+  padding: 1px 4px;                            
+  border-radius: 0px;                        
+}
+
+.md-typeset code.highlight-red-black,
+.md-typeset mark.highlight-red-black {
+  background-color: rgb(210, 31, 31); 
+  color : rgba(0, 0, 0, 1); 
+  padding: 1px 4px;                            
+  border-radius: 0px;                        
+}

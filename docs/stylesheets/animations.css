@@ -1,0 +1,54 @@
+.anim-pulse {
+  animation: anim-pulse 1000ms infinite;
+}
+@keyframes anim-pulse {
+  0%, 40%, 80%, 100% {
+    transform: scale(1);
+  }
+  20%, 60% {
+    transform: scale(1.15);
+  }
+}
+
+.anim-pulse-large {
+  animation: anim-pulse-large 1000ms infinite;
+}
+@keyframes anim-pulse-large {
+  0%, 40%, 80%, 100% {
+    transform: scale(1);
+  }
+  20%, 60% {
+    transform: scale(2);
+  }
+}
+
+.anim-pulse-big-brain {
+  animation: anim-pulse-big-brain 2s infinite ease-in;
+}
+@keyframes anim-pulse-big-brain {
+  0% {
+    transform-origin: 50% 90%; 
+    transform: scale(1);
+  }
+  80% {
+    transform-origin: 50% 90%; 
+    transform: scale(2) rotate(30deg);
+  }
+  95% {
+    transform-origin: 50% 90%; 
+    transform: scale(0.7);
+  }
+}
+
+.anim-spin {
+  animation: anim-spin 2s linear infinite; 
+}
+
+@keyframes anim-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}

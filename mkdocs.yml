@@ -56,7 +56,8 @@ plugins:
 
 extra_css:
   - stylesheets/extra.css
-  
+  - stylesheets/animations.css
+
 extra:
   generator: false
   
@@ -66,6 +67,7 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - def_list
+  - abbr
 
   - pymdownx.inlinehilite
   - pymdownx.snippets
@@ -84,16 +86,15 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
       options:
         custom_icons:
           - overrides/.icons
+  
  
 copyright: |
-  &copy; 2024 by <a href="https://github.com/giac-b" target="_blank" rel="noopener">
+  &copy; 2026 by <a href="https://github.com/giac-b" target="_blank" rel="noopener">
     Giacomo Balma
     <picture>
       <source srcset="https://fonts.gstatic.com/s/e/notoemoji/latest/1f438/512.webp" type="image/webp">
@@ -104,3 +105,7 @@ copyright: |
 validation:
   links:
     absolute_links: relative_to_docs
+
+
+hooks:
+  - hooks.py
